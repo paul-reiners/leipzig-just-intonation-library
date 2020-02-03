@@ -31,7 +31,6 @@ package com.leipzig48.leipzig.core;
 import java.util.Arrays;
 
 import com.leipzig48.leipzig.exceptions.InvalidIntervalException;
-
 import junit.framework.TestCase;
 
 /**
