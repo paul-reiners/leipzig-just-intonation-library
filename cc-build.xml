@@ -1,0 +1,9 @@
+<project name="cc-build" default="build" basedir="checkout">
+
+  <target name="build">
+    <delete dir="Leipzig" />
+    <cvs command="co Leipzig" /> 
+    <ant antfile="build.xml" dir="Leipzig" target="test" />
+  </target>
+
+</project>

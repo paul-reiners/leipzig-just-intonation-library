@@ -1,0 +1,43 @@
+<cruisecontrol>
+  <project name="Leipzig" buildafterfailed="false">
+
+    <bootstrappers>
+      <currentbuildstatusbootstrapper 
+        file="logs/Leipzig/currentbuildstatus.txt" />
+    </bootstrappers>
+
+    <modificationset quietperiod="60">
+      <cvs localworkingcopy="checkout/Leipzig" />
+    </modificationset>
+
+    <schedule interval="60">
+      <ant buildfile="cc-build.xml" target="build" />
+    </schedule>
+
+    <log dir="logs/Leipzig">
+      <merge dir="checkout/Leipzig/build/test-results" />
+    </log>
+
+    <publishers>
+      <currentbuildstatuspublisher 
+        file="logs/Leipzig/currentbuildstatus.txt" />
+
+      <htmlemail mailhost="mail.monkeybrains.net"
+        returnaddress="cruisecontrol@leipzig48.com" 
+        defaultsuffix="@leipzig48.com" 
+        buildresultsurl="http://localhost:8080/cruisecontrol/buildresults/Leipzig" 
+        css="/Users/reiners/Development/cruisecontrol-2.1.6/reporting/jsp/css/cruisecontrol.css"
+        xsldir="/Users/reiners/Development/cruisecontrol-2.1.6/reporting/jsp/xsl" 
+        logdir="logs/Leipzig">
+
+        <map alias="admin" address="reiners@leipzig48.com" />
+        <map alias="paul" address="paulreiners@users.sourceforge.net" />
+
+        <always address="admin" />
+        <failure address="paul" reportWhenFixed="true" />
+
+      </htmlemail>
+    </publishers>
+
+  </project>
+</cruisecontrol>
