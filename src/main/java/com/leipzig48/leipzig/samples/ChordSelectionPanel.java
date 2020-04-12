@@ -85,23 +85,23 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
 
     private final JRadioButton noChordButton;
 
-    private JRadioButton majorTriadButton;
+    private final JRadioButton majorTriadButton;
 
-    private JRadioButton minorTriadButton;
+    private final JRadioButton minorTriadButton;
 
-    private JRadioButton condissonantTriad1Button;
+    private final JRadioButton condissonantTriad1Button;
 
-    private JRadioButton condissonantTriad2Button;
+    private final JRadioButton condissonantTriad2Button;
 
-    private JRadioButton majorSeventhChordButton;
+    private final JRadioButton majorSeventhChordButton;
 
-    private JRadioButton minorSeventhChordButton;
+    private final JRadioButton minorSeventhChordButton;
 
-    private JRadioButton majorNinthChordButton;
+    private final JRadioButton majorNinthChordButton;
 
-    private JRadioButton minorNinthChordButton;
+    private final JRadioButton minorNinthChordButton;
 
-    private HashMap chordToButton;
+    private final HashMap chordToButton;
 
     private static final int MAX_VOICES = 8;
     private Synthesizer synth;
@@ -110,11 +110,11 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
     /**
      * Number of seconds to generate music in advance of presentation-time.
      */
-    private double advance = 0.2;
-    private double secondsPerBeat = 0.6;
+    private final double advance = 0.2;
+    private final double secondsPerBeat = 0.6;
     // on time over note duration
-    private double dutyCycle = 0.8;
-    private double measure = secondsPerBeat * 4.0;
+    private final double dutyCycle = 0.8;
+    private final double measure = secondsPerBeat * 4.0;
     private UnitVoice[] voices;
 
     /**
@@ -295,27 +295,26 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
 
     private void playChord1(double time, double p1, double p2, double p3) throws InterruptedException {
         double dur = dutyCycle * secondsPerBeat;
-        playTriad(time, dur, p1, p2, p3);
+        playChord(time, dur, new double[] {p1, p2, p3});
         time += secondsPerBeat;
-        playTriad(time, dur, p1, p2, p3);
+        playChord(time, dur, new double[] {p1, p2, p3});
         time += secondsPerBeat;
-        playTriad(time, dur * 0.25, p1, p2, p3);
+        playChord(time, dur * 0.25, new double[] {p1, p2, p3});
         time += secondsPerBeat * 0.25;
-        playTriad(time, dur * 0.25, p1, p2, p3);
+        playChord(time, dur * 0.25, new double[] {p1, p2, p3});
         time += secondsPerBeat * 0.75;
-        playTriad(time, dur, p1, p2, p3);
+        playChord(time, dur, new double[] {p1, p2, p3});
         time += secondsPerBeat;
     }
 
-    private void playTriad(double time, double dur, double p1, double p2, double p3)
-            throws InterruptedException {
-        noteOn(time, 1, p1);
-        noteOn(time, 2, p2);
-        noteOn(time, 3, p3);
+    private void playChord(double time, double dur, double[] freqs) {
+        for (int i = 0; i < freqs.length; i++) {
+            noteOn(time, i, freqs[i]);
+        }
         double offTime = time + dur;
-        noteOff(offTime, 1);
-        noteOff(offTime, 2);
-        noteOff(offTime, 3);
+        for (int i = 0; i < freqs.length; i++) {
+            noteOff(offTime, i);
+        }
     }
 
     private void noteOff(double time, int tag) {
