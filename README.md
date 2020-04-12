@@ -1,6 +1,4 @@
 # Leipzig README
-</head>
-<body bgcolor="#ffffff">
 	<h1>Description</h1>
 	<p>
 	Leipzig is a Just Intonation library written in Java. Leipzig makes it easy for a programmer writing a music application to experiment with Just Intonation tunings, thus freeing him from the conventional equal temperament tuning system.
@@ -95,5 +93,3 @@ From <a href="http://mathworld.wolfram.com/"><i>MathWorld</i></a>--A Wolfram Web
 	Attend the Just Intonation Network's Twentieth Anniversary Concert Series this Spring (2005).
 	See the <a href="http://www.justintonation.net/">Just Intonation Network's website</a> for more info.
 	</p>
-</body>
-</html>
