@@ -69,9 +69,7 @@ public class RadioButtonPanel extends JPanel implements ActionListener {
 
 	/**
 	 * @param buttonStrings
-	 * @param actionPrefix2
 	 * @param mnemonics
-	 * @param turmites
 	 * @param selectFirst
 	 * @param rows
 	 * @param cols

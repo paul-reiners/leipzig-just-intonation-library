@@ -40,11 +40,9 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import jmsltutorial.SineCircuit;
-
+import com.jsyn.unitgen.LineOut;
 import com.leipzig48.leipzig.exceptions.InvalidIntervalException;
 import com.leipzig48.leipzig.lattices.FiveLimitLattice;
-import com.softsynth.jsyn.LineOut;
 import com.softsynth.jsyn.Synth;
 import com.softsynth.jsyn.SynthAlert;
 import com.softsynth.jsyn.SynthCircuit;
@@ -105,7 +103,7 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 	protected int radius = DEFAULT_RADIUS;
 
 	/*
-	 * Ê* Setup synthesis by overriding start() method. Ê
+	 * ï¿½* Setup synthesis by overriding start() method. ï¿½
 	 */
 	public void start() {
 		try {
@@ -136,16 +134,17 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 		Synth.startEngine(0);
 		/* Your setup code goes here. */
 		//			Create a voice allocator and connect it to a LineOut.
-		allocator = new BussedVoiceAllocator(MAX_NOTES) {
-			public SynthCircuit makeVoice() throws SynthException {
-				SynthNote circ = new SineCircuit();
-				return addVoiceToMix(circ); // mix through bus writer
-			}
-		};
+		// TODO Fix.
+//		allocator = new BussedVoiceAllocator(MAX_NOTES) {
+//			public SynthCircuit makeVoice() throws SynthException {
+//				SynthNote circ = new SineCircuit();
+//				return addVoiceToMix(circ); // mix through bus writer
+//			}
+//		};
 
 		unitOut = new LineOut();
-		allocator.getOutput().connect(0, unitOut.input, 0);
-		allocator.getOutput().connect(0, unitOut.input, 1);
+//		allocator.getOutput().connect(0, unitOut.input, 0);
+//		allocator.getOutput().connect(0, unitOut.input, 1);
 
 		unitOut.start();
 	}
@@ -181,7 +180,7 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 	abstract JPanel createTurmiteSelectionPanel();
 
 	/*
-	 * Ê* Clean up synthesis by overriding stop() method. Ê
+	 * ï¿½* Clean up synthesis by overriding stop() method. ï¿½
 	 */
 	public void stop() {
 		try {

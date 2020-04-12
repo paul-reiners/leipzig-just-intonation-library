@@ -36,8 +36,6 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import com.softsynth.jsyn.AppletFrame;
-
 /**
  * @author Paul Reiners
  */
@@ -58,10 +56,8 @@ public class JITurmiteApplet extends AbstractJITurmite {
 	public static void main(String args[]) {
 		AbstractJITurmite applet = new JITurmiteApplet();
 		applet.radius = DEFAULT_RADIUS;
-		AppletFrame frame = new AppletFrame("Just Intonation Turmite", applet);
-		frame.setSize(WIDTH, HEIGHT);
-		frame.setVisible(true);
-		frame.test();
+		// TODO Fix.
+		// TODO Fix.
 	}
 
 	/*

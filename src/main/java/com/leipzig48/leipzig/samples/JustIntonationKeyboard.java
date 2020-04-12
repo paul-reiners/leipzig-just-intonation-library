@@ -41,8 +41,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
-import jmsltutorial.SineCircuit;
-
 import com.leipzig48.leipzig.core.FiveLimitChord;
 import com.leipzig48.leipzig.core.FiveLimitTransposition;
 import com.leipzig48.leipzig.core.Interval;
@@ -50,11 +48,6 @@ import com.leipzig48.leipzig.exceptions.InvalidIntervalException;
 import com.leipzig48.leipzig.gui.TransposePanel;
 import com.leipzig48.leipzig.lattices.Direction;
 import com.leipzig48.leipzig.lattices.FiveLimitLattice;
-import com.softsynth.jmsl.JMSL;
-import com.softsynth.jmsl.JMSLMixerContainer;
-import com.softsynth.jmsl.jsyn.JSynInsFromClassName;
-import com.softsynth.jmsl.jsyn.JSynMusicDevice;
-import com.softsynth.jmsl.util.TuningTable;
 
 /**
  * @author Paul Reiners
@@ -73,9 +66,9 @@ public class JustIntonationKeyboard extends JApplet implements ItemListener,
 
 	TuningTable tuning;
 
-	JSynInsFromClassName instrument;
-
-	JMSLMixerContainer mixer;
+	// TODO Fix.
+//	JSynInsFromClassName instrument;
+//	JMSLMixerContainer mixer;
 
 	private final static int X_RADIUS = 4;
 
@@ -135,8 +128,9 @@ public class JustIntonationKeyboard extends JApplet implements ItemListener,
 	}
 
 	public void start() {
-		JMSL.setIsApplet(true);
-		JSynMusicDevice.instance().open();
+		// TODO Fix.
+//		JMSL.setIsApplet(true);
+//		JSynMusicDevice.instance().open();
 		try {
 			lattice = new FiveLimitLattice(X_RADIUS, Y_RADIUS);
 		} catch (InvalidIntervalException e) {
@@ -162,35 +156,39 @@ public class JustIntonationKeyboard extends JApplet implements ItemListener,
 	 *  
 	 */
 	private void buildInstrumentAndMixer() {
-		String instrumentClassName = SineCircuit.class.getName();
+		// TODO Fix.
+//		String instrumentClassName = SineCircuit.class.getName();
 		String instrumentName = "Sine Wave";
 		if (sawToothRB.isSelected()) {
-			instrumentClassName = "com.softsynth.jsyn.circuits.FilteredSawtoothBL";
+//			instrumentClassName = "com.softsynth.jsyn.circuits.FilteredSawtoothBL";
 			instrumentName = "Sawtooth";
 		}
 
-		buildInstrument(instrumentClassName, instrumentName);
+//		buildInstrument(instrumentClassName, instrumentName);
 		buildMixer();
 	}
 
 	private void buildMixer() {
-		mixer = new JMSLMixerContainer();
-		mixer.start();
-		mixer.addInstrument(instrument);
+		// TODO Fix.
+//		mixer = new JMSLMixerContainer();
+//		mixer.start();
+//		mixer.addInstrument(instrument);
 	}
 
 	public void stop() {
 		removeAll();
-		JMSL.closeMusicDevices();
+		// TODO Fix.
+//		JMSL.closeMusicDevices();
 	}
 
 	private void buildInstrument(String instrumentClassName,
 			String instrumentName) {
 		// 8 voice polyphony. Substitute any fully qualified SynthNote class
 		// name
-		instrument = new JSynInsFromClassName(8, instrumentClassName);
-		instrument.setTuning(tuning); // !!!!
-		instrument.setName(instrumentName);
+		// TODO Fix.
+//		instrument = new JSynInsFromClassName(8, instrumentClassName);
+//		instrument.setTuning(tuning); // !!!!
+//		instrument.setName(instrumentName);
 	}
 
 	private void buildTuning() {
@@ -266,11 +264,12 @@ public class JustIntonationKeyboard extends JApplet implements ItemListener,
 		double amplitude = 0.4;
 		double hold = 1.0; // not important since virtual key controls sustain
 		double[] data = { dur, pitch, amplitude, hold };
+		// TODO Fix.
 		if (state) {
-			instrument.on(JMSL.now(), 1.0, data);
-			System.out.println("Playing " + tuning.getFrequency(pitch) + " Hz");
+//			instrument.on(JMSL.now(), 1.0, data);
+//			System.out.println("Playing " + tuning.getFrequency(pitch) + " Hz");
 		} else {
-			instrument.off(JMSL.now(), 1.0, data);
+//			instrument.off(JMSL.now(), 1.0, data);
 		}
 		enableControls();
 	}
@@ -396,8 +395,6 @@ public class JustIntonationKeyboard extends JApplet implements ItemListener,
 
 	/**
 	 * @param direction
-	 * @param height
-	 * @param width
 	 */
 	private boolean isRoomToMove(Direction direction) {
 		int height = cb.length;

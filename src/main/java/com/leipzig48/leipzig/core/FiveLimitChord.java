@@ -111,8 +111,8 @@ public class FiveLimitChord {
     }
 
     /**
-     * @param rootX
-     * @param rootY
+     * @param dX
+     * @param dY
      * @return
      */
     public FiveLimitChord transpose(int dX, int dY) {
