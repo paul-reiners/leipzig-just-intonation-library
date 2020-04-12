@@ -85,7 +85,7 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
 
     private final JRadioButton noChordButton;
 
-    private JRadioButton majorTriadButton = new JRadioButton(majorTriadString);
+    private JRadioButton majorTriadButton;
 
     private JRadioButton minorTriadButton;
 
@@ -276,6 +276,8 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
                 playMeasure1(time, FiveLimitChord.MINOR_TRIAD.getIntervals());
             } else if (actionCommand.equals("chord:" + condissonantTriad1String)) {
                 playMeasure1(time, FiveLimitChord.CONDISSONANT_TRIADS[0].getIntervals());
+            } else if (actionCommand.equals("chord:" + condissonantTriad2String)) {
+                playMeasure1(time, FiveLimitChord.CONDISSONANT_TRIADS[1].getIntervals());
             }
             time += measure;
             catchUp(time);
