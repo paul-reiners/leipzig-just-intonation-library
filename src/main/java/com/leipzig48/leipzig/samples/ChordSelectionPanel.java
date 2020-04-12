@@ -107,10 +107,6 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
     private Synthesizer synth;
     private VoiceAllocator allocator;
     private LineOut lineOut;
-    /**
-     * Number of seconds to generate music in advance of presentation-time.
-     */
-    private final double advance = 0.2;
     private final double secondsPerBeat = 0.6;
     // on time over note duration
     private final double dutyCycle = 0.8;
@@ -278,6 +274,8 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
                 playMeasure1(time, FiveLimitChord.CONDISSONANT_TRIADS[0].getIntervals());
             } else if (actionCommand.equals("chord:" + condissonantTriad2String)) {
                 playMeasure1(time, FiveLimitChord.CONDISSONANT_TRIADS[1].getIntervals());
+            } else if (actionCommand.equals("chord:" + majorSeventhChordString)) {
+                playMeasure1(time, FiveLimitChord.MAJOR_SEVENTH_CHORD.getIntervals());
             }
             time += measure;
             catchUp(time);
@@ -329,6 +327,10 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
     }
 
     private void catchUp(double time) throws InterruptedException {
+        /**
+         * Number of seconds to generate music in advance of presentation-time.
+         */
+        double advance = 0.2;
         synth.sleepUntil(time - advance);
     }
 
