@@ -1,11 +1,6 @@
-# Leipzig README
-	<h1>Description</h1>
-	<p>
-	Leipzig is a Just Intonation library written in Java. Leipzig makes it easy for a programmer writing a music application to experiment with Just Intonation tunings, thus freeing him from the conventional equal temperament tuning system.
-	</p>
+# Description
 	
-	<h1>Website</h1>
-	<p><a href="http://sourceforge.net/projects/leipzig/"><i>SourceForge.net: Project Info - Leipzig: A Just Intonation Library</i></a> is the project website.</p>
+	Leipzig is a Just Intonation library written in Java. Leipzig makes it easy for a programmer writing a music application to experiment with Just Intonation tunings, thus freeing him from the conventional equal temperament tuning system.
 	
 	<h1>Build environment</h1>
 	<p>
