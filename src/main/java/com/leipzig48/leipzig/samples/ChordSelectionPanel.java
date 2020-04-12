@@ -290,20 +290,20 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
         double freq1 = intervals[0].getFrequency();
         double freq2 = intervals[1].getFrequency();
         double freq3 = intervals[2].getFrequency();
-        playChord1(time, freq1, freq2, freq3);
+        playChord1(time, new double[] {freq1, freq2, freq3});
     }
 
-    private void playChord1(double time, double p1, double p2, double p3) throws InterruptedException {
+    private void playChord1(double time, double[] freqs) {
         double dur = dutyCycle * secondsPerBeat;
-        playChord(time, dur, new double[] {p1, p2, p3});
+        playChord(time, dur, freqs);
         time += secondsPerBeat;
-        playChord(time, dur, new double[] {p1, p2, p3});
+        playChord(time, dur, freqs);
         time += secondsPerBeat;
-        playChord(time, dur * 0.25, new double[] {p1, p2, p3});
+        playChord(time, dur * 0.25, freqs);
         time += secondsPerBeat * 0.25;
-        playChord(time, dur * 0.25, new double[] {p1, p2, p3});
+        playChord(time, dur * 0.25, freqs);
         time += secondsPerBeat * 0.75;
-        playChord(time, dur, new double[] {p1, p2, p3});
+        playChord(time, dur, freqs);
         time += secondsPerBeat;
     }
 
