@@ -107,10 +107,6 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
     private Synthesizer synth;
     private VoiceAllocator allocator;
     private final double secondsPerBeat = 0.6;
-    // on time over note duration
-    private final double dutyCycle = 0.8;
-    private final double measure = secondsPerBeat * 4.0;
-    private UnitVoice[] voices;
 
     /**
      *
@@ -217,7 +213,7 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
         LineOut lineOut;
         synth.add(lineOut = new LineOut());
 
-        voices = new UnitVoice[MAX_VOICES];
+        UnitVoice[] voices = new UnitVoice[MAX_VOICES];
         for (int i = 0; i < MAX_VOICES; i++) {
             SubtractiveSynthVoice voice = new SubtractiveSynthVoice();
             synth.add(voice);
@@ -278,7 +274,12 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
                 playMeasure1(time, FiveLimitChord.MAJOR_SEVENTH_CHORD.getIntervals());
             } else if (actionCommand.equals("chord:" + minorSeventhChordString)) {
                 playMeasure1(time, FiveLimitChord.MINOR_SEVENTH_CHORD.getIntervals());
+            } else if (actionCommand.equals("chord:" + majorNinthChordString)) {
+                playMeasure1(time, FiveLimitChord.MAJOR_NINTH_CHORD.getIntervals());
+            } else if (actionCommand.equals("chord:" + minorNinthChordString)) {
+                playMeasure1(time, FiveLimitChord.MINOR_NINTH_CHORD.getIntervals());
             }
+            double measure = secondsPerBeat * 4.0;
             time += measure;
             catchUp(time);
         } catch (InterruptedException | InvalidIntervalException exception) {
@@ -286,7 +287,7 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
         }
     }
 
-    private void playMeasure1(double time, Interval[] intervals) throws InterruptedException, InvalidIntervalException {
+    private void playMeasure1(double time, Interval[] intervals) throws InvalidIntervalException {
         double[] freqs = new double[intervals.length];
         for (int i = 0; i < intervals.length; i++) {
             freqs[i] = intervals[i].getFrequency();
@@ -295,6 +296,8 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
     }
 
     private void playChord1(double time, double[] freqs) {
+        // on time over note duration
+        double dutyCycle = 0.8;
         double dur = dutyCycle * secondsPerBeat;
         playChord(time, dur, freqs);
         time += secondsPerBeat;
@@ -305,7 +308,6 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
         playChord(time, dur * 0.25, freqs);
         time += secondsPerBeat * 0.75;
         playChord(time, dur, freqs);
-        time += secondsPerBeat;
     }
 
     private void playChord(double time, double dur, double[] freqs) {
@@ -328,10 +330,10 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
         allocator.noteOn(tag, frequency, amplitude, timeStamp);
     }
 
+    /**
+     * Number of seconds to generate music in advance of presentation-time.
+     */
     private void catchUp(double time) throws InterruptedException {
-        /**
-         * Number of seconds to generate music in advance of presentation-time.
-         */
         double advance = 0.2;
         synth.sleepUntil(time - advance);
     }
