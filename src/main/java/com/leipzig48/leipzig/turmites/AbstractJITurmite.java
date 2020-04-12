@@ -146,7 +146,7 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 //		allocator.getOutput().connect(0, unitOut.input, 0);
 //		allocator.getOutput().connect(0, unitOut.input, 1);
 
-		unitOut.start();
+//		unitOut.start();
 	}
 
 	/**
@@ -244,8 +244,9 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 	private void createNote(int ticksPerBeat, int nextTime, int onTime,
 			int turmiteIndex) {
 		// allocate a new note, stealing one if necessary
-		SynthNote note = (SynthNote) allocator.steal(nextTime, nextTime
-				+ (2 * ticksPerBeat));
+		// TODO Fix.
+//		SynthNote note = (SynthNote) allocator.steal(nextTime, nextTime
+//				+ (2 * ticksPerBeat));
 		// calculate frequency from Turmite
 		int index = (cacheIndex + turmiteIndex) % 4;
 		int x = xCache[turmiteIndex][index];
@@ -257,7 +258,7 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 		}
 		frequency /= mult;
 		// play note using event buffer for accurate timing
-		note.noteOnFor(nextTime, onTime, frequency, 0.15);
+//		note.noteOnFor(nextTime, onTime, frequency, 0.15);
 	}
 
 	abstract JComponent[] getExtraControls();
@@ -322,7 +323,8 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 	 *  
 	 */
 	void stopNotes() {
-		allocator.clear();
+		// TODO Fix.
+//		allocator.clear();
 		try {
 			Thread.sleep(CATCH_UP_TIME_IN_MILLISECONDS);
 		} catch (InterruptedException e) {
