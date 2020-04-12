@@ -101,7 +101,7 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
 
     private final JRadioButton minorNinthChordButton;
 
-    private final HashMap chordToButton;
+    private final HashMap<FiveLimitChord, JRadioButton> chordToButton;
 
     private static final int MAX_VOICES = 8;
     private Synthesizer synth;
@@ -287,10 +287,11 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
     }
 
     private void playMeasure1(double time, Interval[] intervals) throws InterruptedException, InvalidIntervalException {
-        double freq1 = intervals[0].getFrequency();
-        double freq2 = intervals[1].getFrequency();
-        double freq3 = intervals[2].getFrequency();
-        playChord1(time, new double[] {freq1, freq2, freq3});
+        double[] freqs = new double[intervals.length];
+        for (int i = 0; i < intervals.length; i++) {
+            freqs[i] = intervals[i].getFrequency();
+        }
+        playChord1(time, freqs);
     }
 
     private void playChord1(double time, double[] freqs) {
