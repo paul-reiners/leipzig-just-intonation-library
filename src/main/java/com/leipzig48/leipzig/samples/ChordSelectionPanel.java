@@ -51,7 +51,6 @@ import com.jsyn.util.VoiceAllocator;
 import com.leipzig48.leipzig.core.FiveLimitChord;
 import com.leipzig48.leipzig.core.Interval;
 import com.leipzig48.leipzig.exceptions.InvalidIntervalException;
-import com.softsynth.math.AudioMath;
 import com.softsynth.shared.time.TimeStamp;
 
 /**
@@ -84,7 +83,7 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
 
     static String actionPrefix = "chord:";
 
-    private JRadioButton noChordButton = new JRadioButton(noChordString);
+    private JRadioButton noChordButton;
 
     private JRadioButton majorTriadButton = new JRadioButton(majorTriadString);
 
@@ -272,20 +271,18 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
 
         try {
             if (actionCommand.equals("chord:The Major Triad")) {
-                int tonic = 60 - 12;
-                playMajorMeasure1(time, tonic);
-                time += measure;
-                catchUp(time);
+                playMeasure1(time, FiveLimitChord.MAJOR_TRIAD.getIntervals());
+            } else if (actionCommand.equals("chord:The Minor Triad")) {
+                playMeasure1(time, FiveLimitChord.MINOR_TRIAD.getIntervals());
             }
-        } catch (InterruptedException exception) {
+            time += measure;
+            catchUp(time);
+        } catch (InterruptedException | InvalidIntervalException exception) {
             exception.printStackTrace();
-        } catch (InvalidIntervalException invalidIntervalException) {
-            invalidIntervalException.printStackTrace();
         }
     }
 
-    private void playMajorMeasure1(double time, int base) throws InterruptedException, InvalidIntervalException {
-        Interval[] intervals = FiveLimitChord.MAJOR_TRIAD.getIntervals();
+    private void playMeasure1(double time, Interval[] intervals) throws InterruptedException, InvalidIntervalException {
         double freq1 = intervals[0].getFrequency();
         double freq2 = intervals[1].getFrequency();
         double freq3 = intervals[2].getFrequency();
