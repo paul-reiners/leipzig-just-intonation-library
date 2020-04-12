@@ -106,7 +106,6 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
     private static final int MAX_VOICES = 8;
     private Synthesizer synth;
     private VoiceAllocator allocator;
-    private LineOut lineOut;
     private final double secondsPerBeat = 0.6;
     // on time over note duration
     private final double dutyCycle = 0.8;
@@ -215,6 +214,7 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
         synth = JSyn.createSynthesizer();
 
         // Add an output.
+        LineOut lineOut;
         synth.add(lineOut = new LineOut());
 
         voices = new UnitVoice[MAX_VOICES];
@@ -276,6 +276,8 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
                 playMeasure1(time, FiveLimitChord.CONDISSONANT_TRIADS[1].getIntervals());
             } else if (actionCommand.equals("chord:" + majorSeventhChordString)) {
                 playMeasure1(time, FiveLimitChord.MAJOR_SEVENTH_CHORD.getIntervals());
+            } else if (actionCommand.equals("chord:" + minorSeventhChordString)) {
+                playMeasure1(time, FiveLimitChord.MINOR_SEVENTH_CHORD.getIntervals());
             }
             time += measure;
             catchUp(time);
