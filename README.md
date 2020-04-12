@@ -1,11 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-<META NAME="Description" CONTENT="README file for Leipzig">
-<META NAME="Keywords" CONTENT="just intonation, library, temperament">
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<title>
-Leipzig README</title>
+# Leipzig README
 </head>
 <body bgcolor="#ffffff">
 	<h1>Description</h1>
