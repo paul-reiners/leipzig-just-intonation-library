@@ -28,27 +28,24 @@
  */
 package com.leipzig48.leipzig.turmites;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Random;
-
-import javax.swing.JApplet;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-
+import com.jsyn.JSyn;
+import com.jsyn.Synthesizer;
+import com.jsyn.instruments.SubtractiveSynthVoice;
 import com.jsyn.unitgen.LineOut;
+import com.jsyn.unitgen.UnitVoice;
+import com.jsyn.util.VoiceAllocator;
 import com.leipzig48.leipzig.exceptions.InvalidIntervalException;
 import com.leipzig48.leipzig.lattices.FiveLimitLattice;
 import com.softsynth.jsyn.Synth;
 import com.softsynth.jsyn.SynthAlert;
-import com.softsynth.jsyn.SynthCircuit;
 import com.softsynth.jsyn.SynthException;
-import com.softsynth.jsyn.SynthNote;
-import com.softsynth.jsyn.util.BussedVoiceAllocator;
+import com.softsynth.shared.time.TimeStamp;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Random;
 
 /**
  * @author Paul Reiners
@@ -63,14 +60,9 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 
 	protected static final int CATCH_UP_TIME_IN_MILLISECONDS = 5000;
 
-	/* Declare Synthesis Objects here */
-	LineOut unitOut;
-
-	BussedVoiceAllocator allocator;
+	VoiceAllocator allocator;
 
 	boolean go = false;
-
-	final static int MAX_NOTES = 4;
 
 	protected final static int DEFAULT_RADIUS = 48;
 
@@ -101,6 +93,8 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 	protected Random rand = new Random();
 
 	protected int radius = DEFAULT_RADIUS;
+	private Synthesizer synth;
+	private static final int MAX_VOICES = 8;
 
 	/*
 	 * �* Setup synthesis by overriding start() method. �
@@ -132,21 +126,31 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 	 */
 	private void startSynthEngine() {
 		Synth.startEngine(0);
-		/* Your setup code goes here. */
-		//			Create a voice allocator and connect it to a LineOut.
-		// TODO Fix.
-//		allocator = new BussedVoiceAllocator(MAX_NOTES) {
-//			public SynthCircuit makeVoice() throws SynthException {
-//				SynthNote circ = new SineCircuit();
-//				return addVoiceToMix(circ); // mix through bus writer
-//			}
-//		};
+		initializeMusic();
+	}
 
-		unitOut = new LineOut();
-//		allocator.getOutput().connect(0, unitOut.input, 0);
-//		allocator.getOutput().connect(0, unitOut.input, 1);
+	private void initializeMusic() {
+		synth = JSyn.createSynthesizer();
 
-//		unitOut.start();
+		// Add an output.
+		LineOut lineOut;
+		synth.add(lineOut = new LineOut());
+
+		UnitVoice[] voices = new UnitVoice[MAX_VOICES];
+		for (int i = 0; i < MAX_VOICES; i++) {
+			SubtractiveSynthVoice voice = new SubtractiveSynthVoice();
+			synth.add(voice);
+			voice.getOutput().connect(0, lineOut.input, 0);
+			voice.getOutput().connect(0, lineOut.input, 1);
+			voices[i] = voice;
+		}
+		allocator = new VoiceAllocator(voices);
+
+		// Start synthesizer using default stereo output at 44100 Hz.
+		synth.start();
+		// We only need to start the LineOut. It will pull data from the
+		// voices.
+		lineOut.start();
 	}
 
 	/**
@@ -218,7 +222,7 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 					yCache[i][cacheIndex] = y;
 					colorCache[i][cacheIndex] = turmites[i].getColor();
 
-					createNote(ticksPerBeat, nextTime, onTime, i);
+					createNote(onTime, i);
 				}
 
 				nextTime += ticksPerBeat;
@@ -241,12 +245,9 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 
 	abstract protected boolean move();
 
-	private void createNote(int ticksPerBeat, int nextTime, int onTime,
-			int turmiteIndex) {
+	private void createNote(int onTime,
+							int turmiteIndex) {
 		// allocate a new note, stealing one if necessary
-		// TODO Fix.
-//		SynthNote note = (SynthNote) allocator.steal(nextTime, nextTime
-//				+ (2 * ticksPerBeat));
 		// calculate frequency from Turmite
 		int index = (cacheIndex + turmiteIndex) % 4;
 		int x = xCache[turmiteIndex][index];
@@ -257,8 +258,16 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 			mult = mult << 1;
 		}
 		frequency /= mult;
-		// play note using event buffer for accurate timing
-//		note.noteOnFor(nextTime, onTime, frequency, 0.15);
+
+		// Get synthesizer time in seconds.
+		double timeNow = synth.getCurrentTime();
+
+		// Advance to a near future time so we have a clean start.
+		TimeStamp timeStamp = new TimeStamp(timeNow + 0.5);
+
+		// Schedule a note on and off.
+		allocator.noteOn(0, frequency, 0.5, timeStamp);
+		allocator.noteOff(0, timeStamp.makeRelative(onTime));
 	}
 
 	abstract JComponent[] getExtraControls();
@@ -285,8 +294,8 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 		startStopBtn.setActionCommand("startstop");
 		startStopBtn.addActionListener(this);
 		pnlCommandButtons.add(startStopBtn);
-		for (int i = 0; i < extraControls.length; i++) {
-			pnlCommandButtons.add(extraControls[i]);
+		for (JComponent extraControl : extraControls) {
+			pnlCommandButtons.add(extraControl);
 		}
 
 		pnlSupplementaryControls.add(pnlCommandButtons);
@@ -324,7 +333,12 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 	 */
 	void stopNotes() {
 		// TODO Fix.
-//		allocator.clear();
+		// Get synthesizer time in seconds.
+		double timeNow = synth.getCurrentTime();
+
+		// Advance to a near future time so we have a clean start.
+		TimeStamp timeStamp = new TimeStamp(timeNow + 0.5);
+		allocator.allNotesOff(timeStamp);
 		try {
 			Thread.sleep(CATCH_UP_TIME_IN_MILLISECONDS);
 		} catch (InterruptedException e) {
@@ -381,7 +395,7 @@ public abstract class AbstractJITurmite extends JApplet implements Runnable,
 	}
 
 	/**
-	 * @return
+	 * @return false if turmite went out of bounds
 	 */
 	protected boolean updateTurmitesAndTheirWorld() {
 		int[] x = new int[turmites.length];

@@ -28,12 +28,10 @@
  */
 package com.leipzig48.leipzig.turmites;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
@@ -41,7 +39,7 @@ import javax.swing.JPanel;
  */
 public class JITurmiteApplet extends AbstractJITurmite {
 
-	private JComboBox c = new JComboBox();
+	private final JComboBox<String > c = new JComboBox<>();
 
 	private JCheckBox chkDuet;
 
@@ -53,11 +51,18 @@ public class JITurmiteApplet extends AbstractJITurmite {
 	}
 
 	/* Can be run as either an application or as an applet. */
-	public static void main(String args[]) {
+	public static void main(String[] args) {
 		AbstractJITurmite applet = new JITurmiteApplet();
 		applet.radius = DEFAULT_RADIUS;
-		// TODO Fix.
-		// TODO Fix.
+		JFrame frame = new JFrame("Thirty-Seventh Street Blues");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().add(applet);
+		frame.setSize(WIDTH, HEIGHT);
+		applet.init();
+		applet.start();
+		frame.setVisible(true);
+
+		applet.startTurmite();
 	}
 
 	/*
@@ -80,15 +85,13 @@ public class JITurmiteApplet extends AbstractJITurmite {
 		}
 		for (int i = 0; i < turmiteCnt; i++)
 			c.addItem(description[i]);
-		c.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("index: " + c.getSelectedIndex() + "   "
-						+ ((JComboBox) e.getSource()).getSelectedItem());
-				go = false;
-				stopNotes();
-				turmiteComponent.clearWorld();
-				startTurmite();
-			}
+		c.addActionListener(e -> {
+			System.out.println("index: " + c.getSelectedIndex() + "   "
+					+ ((JComboBox) e.getSource()).getSelectedItem());
+			go = false;
+			stopNotes();
+			turmiteComponent.clearWorld();
+			startTurmite();
 		});
 		JPanel panel = new JPanel();
 		panel.add(c);
