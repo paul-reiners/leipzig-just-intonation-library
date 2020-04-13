@@ -67,12 +67,6 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 
 	private static final Color ROOT_COLOR = Color.GREEN;
 
-	TuningTable tuning;
-
-	// TODO Fix.
-//	JSynInsFromClassName instrument;
-//	JMSLMixerContainer mixer;
-
 	private final static int X_RADIUS = 4;
 
 	private final static int Y_RADIUS = 2;
@@ -85,7 +79,7 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 
 	private JCheckBox[][] cb;
 
-	private JPanel mainPanel;
+	private final JPanel mainPanel;
 
 	private int rootX;
 
@@ -93,36 +87,13 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 
 	private Color bGColor;
 
-	private ButtonGroup synthNoteG = new ButtonGroup();
-
 	private Synthesizer synth;
 	private static final int MAX_VOICES = 8;
 	private VoiceAllocator allocator;
 
-	private ActionListener synthNoteAL = new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			boolean[][] prevState = new boolean[cb.length][cb[0].length];
-			for (int i = 0; i < prevState.length; i++) {
-				for (int j = 0; j < prevState[i].length; j++) {
-					prevState[i][j] = cb[i][j].isSelected();
-				}
-			}
-			clearNotes();
-			System.out.println("Radio button "
-					+ ((JRadioButton) e.getSource()).getText());
-			for (int i = 0; i < prevState.length; i++) {
-				for (int j = 0; j < prevState[i].length; j++) {
-					cb[i][j].setSelected(prevState[i][j]);
-				}
-			}
-		}
-	};
 	private double[] frequencies;
 
 	public JustIntonationKeyboard() {
-		// TODO Fix.
-//		JMSL.setIsApplet(true);
-//		JSynMusicDevice.instance().open();
 		try {
 			lattice = new FiveLimitLattice(X_RADIUS, Y_RADIUS);
 		} catch (InvalidIntervalException e) {
@@ -167,27 +138,11 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 	public static void main(String[] args) {
 		//Schedule a job for the event-dispatching thread:
 		//creating and showing this application's GUI.
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				createAndShowGUI();
-			}
-		});
+		javax.swing.SwingUtilities.invokeLater(JustIntonationKeyboard::createAndShowGUI);
 	}
 
 	public void stop() {
 		removeAll();
-		// TODO Fix.
-//		JMSL.closeMusicDevices();
-	}
-
-	private void buildInstrument(String instrumentClassName,
-			String instrumentName) {
-		// 8 voice polyphony. Substitute any fully qualified SynthNote class
-		// name
-		// TODO Fix.
-//		instrument = new JSynInsFromClassName(8, instrumentClassName);
-//		instrument.setTuning(tuning); // !!!!
-//		instrument.setName(instrumentName);
 	}
 
 	private void buildTuning() {
@@ -202,8 +157,6 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 						.println("Pitch " + pitch + " = " + frequency + " Hz");
 			}
 		}
-		tuning = new TuningTable(frequencies, 0);
-		System.out.println("Octave = " + tuning.getStepsPerOctave());
 	}
 
 	private void buildVirtualKeys() {
@@ -259,22 +212,17 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 		int x = Integer.parseInt(parts[0]);
 		int y = Integer.parseInt(parts[1]);
 		int pitch = indexToPitch(x, y);
-		double dur = 1.0; // not important since virtual key controls sustain
 		double amplitude = 0.4;
-		double hold = 1.0; // not important since virtual key controls sustain
-		double[] data = { dur, pitch, amplitude, hold };
-		// TODO Fix.
 		// Get synthesizer time in seconds.
 		double timeNow = synth.getCurrentTime();
 
 		// Advance to a near future time so we have a clean start.
 		double time = timeNow + 1.0;
 		TimeStamp timeStamp = new TimeStamp(time);
-		int tag = (int) (Math.pow(2, x) * Math.pow(3, y));
 		if (state) {
-			allocator.noteOn(tag, frequencies[pitch], amplitude, timeStamp);
+			allocator.noteOn(pitch, frequencies[pitch], amplitude, timeStamp);
 		} else {
-			allocator.noteOff(tag, timeStamp);
+			allocator.noteOff(pitch, timeStamp);
 		}
 		enableControls();
 	}
@@ -321,8 +269,7 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 				FiveLimitChord.MINOR_SEVENTH_CHORD,
 				FiveLimitChord.MAJOR_NINTH_CHORD,
 				FiveLimitChord.MINOR_NINTH_CHORD };
-		for (int i = 0; i < chords.length; i++) {
-			FiveLimitChord chord = chords[i];
+		for (FiveLimitChord chord : chords) {
 			chordSelectionPanel.setChordEnabled(chord, isRoomForChord(chord));
 		}
 	}
@@ -351,9 +298,6 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 		enableControls();
 	}
 
-	/**
-	 * @param direction
-	 */
 	private void transpose(Direction direction) {
 		FiveLimitTransposition transposition = TransposePanel
 				.createTransposition(direction);
@@ -388,31 +332,31 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 				cb[0][j].setSelected(false);
 			}
 		} else if (direction.equals(Direction.LEFT)) {
-			for (int i = 0; i < height; i++) {
+			for (JCheckBox[] jCheckBoxes : cb) {
 				for (int j = 0; j < width - 1; j++) {
-					cb[i][j].setSelected(cb[i][j + 1].isSelected());
+					jCheckBoxes[j].setSelected(jCheckBoxes[j + 1].isSelected());
 				}
 			}
-			for (int i = 0; i < height; i++) {
-				cb[i][width - 1].setSelected(false);
+			for (JCheckBox[] jCheckBoxes : cb) {
+				jCheckBoxes[width - 1].setSelected(false);
 			}
 		} else if (direction.equals(Direction.RIGHT)) {
-			for (int i = 0; i < height; i++) {
+			for (JCheckBox[] jCheckBoxes : cb) {
 				for (int j = width - 1; j > 0; j--) {
-					cb[i][j].setSelected(cb[i][j - 1].isSelected());
+					jCheckBoxes[j].setSelected(jCheckBoxes[j - 1].isSelected());
 				}
 			}
-			for (int i = 0; i < height; i++) {
-				cb[i][0].setSelected(false);
+			for (JCheckBox[] jCheckBoxes : cb) {
+				jCheckBoxes[0].setSelected(false);
 			}
 		}
 	}
 
 	private boolean isRoomForChord(FiveLimitChord chord) {
 		int[][] displacements = chord.getDisplacements();
-		for (int i = 0; i < displacements.length; i++) {
-			int dX = displacements[i][0];
-			int dY = displacements[i][1];
+		for (int[] displacement : displacements) {
+			int dX = displacement[0];
+			int dY = displacement[1];
 			if (dX + rootX < -X_RADIUS || dX + rootX > X_RADIUS
 					|| dY + rootY > Y_RADIUS || dY + rootY < -Y_RADIUS) {
 				return false;
@@ -423,7 +367,7 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 	}
 
 	/**
-	 * @param direction
+	 * @param direction direction to move
 	 */
 	private boolean isRoomToMove(Direction direction) {
 		int height = cb.length;
@@ -434,36 +378,28 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 					return false;
 				}
 			}
-			if (rootY == Y_RADIUS) {
-				return false;
-			}
+			return rootY != Y_RADIUS;
 		} else if (direction.equals(Direction.DOWN)) {
 			for (int i = 0; i < width; i++) {
 				if (cb[height - 1][i].isSelected()) {
 					return false;
 				}
 			}
-			if (rootY == -Y_RADIUS) {
-				return false;
-			}
+			return rootY != -Y_RADIUS;
 		} else if (direction.equals(Direction.LEFT)) {
-			for (int i = 0; i < height; i++) {
-				if (cb[i][0].isSelected()) {
+			for (JCheckBox[] jCheckBoxes : cb) {
+				if (jCheckBoxes[0].isSelected()) {
 					return false;
 				}
 			}
-			if (rootX == -X_RADIUS) {
-				return false;
-			}
+			return rootX != -X_RADIUS;
 		} else if (direction.equals(Direction.RIGHT)) {
-			for (int i = 0; i < height; i++) {
-				if (cb[i][width - 1].isSelected()) {
+			for (JCheckBox[] jCheckBoxes : cb) {
+				if (jCheckBoxes[width - 1].isSelected()) {
 					return false;
 				}
 			}
-			if (rootX == X_RADIUS) {
-				return false;
-			}
+			return rootX != X_RADIUS;
 		}
 
 		return true;
@@ -482,8 +418,8 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 						e.printStackTrace();
 					}
 					cb[-y + Y_RADIUS][x + X_RADIUS].setSelected(false);
-					for (int i = 0; i < intervals.length; i++) {
-						if (lattice.getNode(x, y).equals(intervals[i])) {
+					for (Interval interval : intervals) {
+						if (lattice.getNode(x, y).equals(interval)) {
 							cb[-y + Y_RADIUS][x + X_RADIUS].setSelected(true);
 						}
 					}

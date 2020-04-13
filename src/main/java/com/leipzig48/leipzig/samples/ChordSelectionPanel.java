@@ -28,30 +28,14 @@
  */
 package com.leipzig48.leipzig.samples;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import com.leipzig48.leipzig.core.FiveLimitChord;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-
-import com.jsyn.JSyn;
-import com.jsyn.Synthesizer;
-import com.jsyn.instruments.SubtractiveSynthVoice;
-import com.jsyn.unitgen.LineOut;
-import com.jsyn.unitgen.UnitVoice;
-import com.jsyn.util.VoiceAllocator;
-import com.leipzig48.leipzig.core.FiveLimitChord;
-import com.leipzig48.leipzig.core.Interval;
-import com.leipzig48.leipzig.exceptions.InvalidIntervalException;
-import com.softsynth.shared.time.TimeStamp;
 
 /**
  * @author Paul Reiners
@@ -103,11 +87,6 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
 
     private final HashMap<FiveLimitChord, JRadioButton> chordToButton;
 
-    private static final int MAX_VOICES = 8;
-    private Synthesizer synth;
-    private VoiceAllocator allocator;
-    private final double secondsPerBeat = 0.6;
-
     /**
      *
      */
@@ -115,7 +94,7 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
         super(new BorderLayout());
 
         //Create the radio buttons.
-        chordToButton = new HashMap();
+        chordToButton = new HashMap<>();
 
         noChordButton = new JRadioButton(noChordString);
         noChordButton.setMnemonic(KeyEvent.VK_H);
@@ -202,32 +181,6 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
 
         add(radioPanel, BorderLayout.LINE_START);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        initializeMusic();
-    }
-
-    private void initializeMusic() {
-        synth = JSyn.createSynthesizer();
-
-        // Add an output.
-        LineOut lineOut;
-        synth.add(lineOut = new LineOut());
-
-        UnitVoice[] voices = new UnitVoice[MAX_VOICES];
-        for (int i = 0; i < MAX_VOICES; i++) {
-            SubtractiveSynthVoice voice = new SubtractiveSynthVoice();
-            synth.add(voice);
-            voice.getOutput().connect(0, lineOut.input, 0);
-            voice.getOutput().connect(0, lineOut.input, 1);
-            voices[i] = voice;
-        }
-        allocator = new VoiceAllocator(voices);
-
-        // Start synthesizer using default stereo output at 44100 Hz.
-        synth.start();
-        // We only need to start the LineOut. It will pull data from the
-        // voices.
-        lineOut.start();
     }
 
     /**
@@ -254,57 +207,6 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String actionCommand = e.getActionCommand();
         System.out.println(actionCommand + " chosen");
-    }
-
-    private void playMeasure1(double time, Interval[] intervals) throws InvalidIntervalException {
-        double[] freqs = new double[intervals.length];
-        for (int i = 0; i < intervals.length; i++) {
-            freqs[i] = intervals[i].getFrequency();
-        }
-        playChord1(time, freqs);
-    }
-
-    private void playChord1(double time, double[] freqs) {
-        // on time over note duration
-        double dutyCycle = 0.8;
-        double dur = dutyCycle * secondsPerBeat;
-        playChord(time, dur, freqs);
-        time += secondsPerBeat;
-        playChord(time, dur, freqs);
-        time += secondsPerBeat;
-        playChord(time, dur * 0.25, freqs);
-        time += secondsPerBeat * 0.25;
-        playChord(time, dur * 0.25, freqs);
-        time += secondsPerBeat * 0.75;
-        playChord(time, dur, freqs);
-    }
-
-    private void playChord(double time, double dur, double[] freqs) {
-        for (int i = 0; i < freqs.length; i++) {
-            noteOn(time, i, freqs[i]);
-        }
-        double offTime = time + dur;
-        for (int i = 0; i < freqs.length; i++) {
-            noteOff(offTime, i);
-        }
-    }
-
-    private void noteOff(double time, int tag) {
-        allocator.noteOff(tag, new TimeStamp(time));
-    }
-
-    private void noteOn(double time, int tag, double frequency) {
-        double amplitude = 0.2;
-        TimeStamp timeStamp = new TimeStamp(time);
-        allocator.noteOn(tag, frequency, amplitude, timeStamp);
-    }
-
-    /**
-     * Number of seconds to generate music in advance of presentation-time.
-     */
-    private void catchUp(double time) throws InterruptedException {
-        double advance = 0.2;
-        synth.sleepUntil(time - advance);
     }
 
     /**
@@ -358,21 +260,10 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
     public static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                createAndShowGUI();
-            }
-        });
-    }
-
-    /**
-     * @return Returns the actionPrefix.
-     */
-    static String getActionPrefix() {
-        return actionPrefix;
+        javax.swing.SwingUtilities.invokeLater(ChordSelectionPanel::createAndShowGUI);
     }
 
     void setChordEnabled(FiveLimitChord chord, boolean enabled) {
-        ((JRadioButton) chordToButton.get(chord)).setEnabled(enabled);
+        chordToButton.get(chord).setEnabled(enabled);
     }
 }
