@@ -254,37 +254,6 @@ class ChordSelectionPanel extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String actionCommand = e.getActionCommand();
         System.out.println(actionCommand + " chosen");
-
-        // Get synthesizer time in seconds.
-        double timeNow = synth.getCurrentTime();
-
-        // Advance to a near future time so we have a clean start.
-        double time = timeNow + 1.0;
-
-        try {
-            if (actionCommand.equals("chord:The Major Triad")) {
-                playMeasure1(time, FiveLimitChord.MAJOR_TRIAD.getIntervals());
-            } else if (actionCommand.equals("chord:The Minor Triad")) {
-                playMeasure1(time, FiveLimitChord.MINOR_TRIAD.getIntervals());
-            } else if (actionCommand.equals("chord:" + condissonantTriad1String)) {
-                playMeasure1(time, FiveLimitChord.CONDISSONANT_TRIADS[0].getIntervals());
-            } else if (actionCommand.equals("chord:" + condissonantTriad2String)) {
-                playMeasure1(time, FiveLimitChord.CONDISSONANT_TRIADS[1].getIntervals());
-            } else if (actionCommand.equals("chord:" + majorSeventhChordString)) {
-                playMeasure1(time, FiveLimitChord.MAJOR_SEVENTH_CHORD.getIntervals());
-            } else if (actionCommand.equals("chord:" + minorSeventhChordString)) {
-                playMeasure1(time, FiveLimitChord.MINOR_SEVENTH_CHORD.getIntervals());
-            } else if (actionCommand.equals("chord:" + majorNinthChordString)) {
-                playMeasure1(time, FiveLimitChord.MAJOR_NINTH_CHORD.getIntervals());
-            } else if (actionCommand.equals("chord:" + minorNinthChordString)) {
-                playMeasure1(time, FiveLimitChord.MINOR_NINTH_CHORD.getIntervals());
-            }
-            double measure = secondsPerBeat * 4.0;
-            time += measure;
-            catchUp(time);
-        } catch (InterruptedException | InvalidIntervalException exception) {
-            exception.printStackTrace();
-        }
     }
 
     private void playMeasure1(double time, Interval[] intervals) throws InvalidIntervalException {

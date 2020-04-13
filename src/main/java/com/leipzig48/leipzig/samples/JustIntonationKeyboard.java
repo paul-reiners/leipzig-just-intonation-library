@@ -37,6 +37,12 @@ import java.awt.event.ItemListener;
 
 import javax.swing.*;
 
+import com.jsyn.JSyn;
+import com.jsyn.Synthesizer;
+import com.jsyn.instruments.SubtractiveSynthVoice;
+import com.jsyn.unitgen.LineOut;
+import com.jsyn.unitgen.UnitVoice;
+import com.jsyn.util.VoiceAllocator;
 import com.leipzig48.leipzig.core.FiveLimitChord;
 import com.leipzig48.leipzig.core.FiveLimitTransposition;
 import com.leipzig48.leipzig.core.Interval;
@@ -44,6 +50,7 @@ import com.leipzig48.leipzig.exceptions.InvalidIntervalException;
 import com.leipzig48.leipzig.gui.TransposePanel;
 import com.leipzig48.leipzig.lattices.Direction;
 import com.leipzig48.leipzig.lattices.FiveLimitLattice;
+import com.softsynth.shared.time.TimeStamp;
 
 /**
  * @author Paul Reiners
@@ -88,8 +95,9 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 
 	private ButtonGroup synthNoteG = new ButtonGroup();
 
-	private JRadioButton sineWaveRB = new JRadioButton("Sine Wave", true),
-			sawToothRB = new JRadioButton("Sawtooth", false);
+	private Synthesizer synth;
+	private static final int MAX_VOICES = 8;
+	private VoiceAllocator allocator;
 
 	private ActionListener synthNoteAL = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
@@ -102,7 +110,6 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 			clearNotes();
 			System.out.println("Radio button "
 					+ ((JRadioButton) e.getSource()).getText());
-			buildInstrumentAndMixer();
 			for (int i = 0; i < prevState.length; i++) {
 				for (int j = 0; j < prevState[i].length; j++) {
 					cb[i][j].setSelected(prevState[i][j]);
@@ -110,18 +117,7 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 			}
 		}
 	};
-
-	public JPanel buildSynthNotePanel() {
-		sineWaveRB.addActionListener(synthNoteAL);
-		sawToothRB.addActionListener(synthNoteAL);
-		synthNoteG.add(sineWaveRB);
-		synthNoteG.add(sawToothRB);
-		JPanel synthNotePanel = new JPanel(new GridLayout(2, 1));
-		synthNotePanel.add(sineWaveRB);
-		synthNotePanel.add(sawToothRB);
-
-		return synthNotePanel;
-	}
+	private double[] frequencies;
 
 	public JustIntonationKeyboard() {
 		// TODO Fix.
@@ -142,10 +138,7 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 		buildChordButtons();
 		buildTranspositionPanel();
 
-		buildInstrumentAndMixer();
-
-		JPanel synthNotePanel = buildSynthNotePanel();
-		mainPanel.add(synthNotePanel);
+		initializeMusic();
 	}
 
 
@@ -181,29 +174,6 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 		});
 	}
 
-	/**
-	 *  
-	 */
-	private void buildInstrumentAndMixer() {
-		// TODO Fix.
-//		String instrumentClassName = SineCircuit.class.getName();
-		String instrumentName = "Sine Wave";
-		if (sawToothRB.isSelected()) {
-//			instrumentClassName = "com.softsynth.jsyn.circuits.FilteredSawtoothBL";
-			instrumentName = "Sawtooth";
-		}
-
-//		buildInstrument(instrumentClassName, instrumentName);
-		buildMixer();
-	}
-
-	private void buildMixer() {
-		// TODO Fix.
-//		mixer = new JMSLMixerContainer();
-//		mixer.start();
-//		mixer.addInstrument(instrument);
-	}
-
 	public void stop() {
 		removeAll();
 		// TODO Fix.
@@ -222,7 +192,7 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 
 	private void buildTuning() {
 		int cnt = (2 * Y_RADIUS + 1) * (2 * X_RADIUS + 1);
-		double[] frequencies = new double[cnt];
+		frequencies = new double[cnt];
 		for (int y = Y_RADIUS; y >= -Y_RADIUS; y--) {
 			for (int x = -X_RADIUS; x <= X_RADIUS; x++) {
 				int pitch = indexToPitch(x, y);
@@ -288,19 +258,49 @@ public class JustIntonationKeyboard extends JPanel implements ItemListener,
 		String[] parts = actionCommand.split(",");
 		int x = Integer.parseInt(parts[0]);
 		int y = Integer.parseInt(parts[1]);
-		double pitch = indexToPitch(x, y);
+		int pitch = indexToPitch(x, y);
 		double dur = 1.0; // not important since virtual key controls sustain
 		double amplitude = 0.4;
 		double hold = 1.0; // not important since virtual key controls sustain
 		double[] data = { dur, pitch, amplitude, hold };
 		// TODO Fix.
+		// Get synthesizer time in seconds.
+		double timeNow = synth.getCurrentTime();
+
+		// Advance to a near future time so we have a clean start.
+		double time = timeNow + 1.0;
+		TimeStamp timeStamp = new TimeStamp(time);
+		int tag = (int) (Math.pow(2, x) * Math.pow(3, y));
 		if (state) {
-//			instrument.on(JMSL.now(), 1.0, data);
-//			System.out.println("Playing " + tuning.getFrequency(pitch) + " Hz");
+			allocator.noteOn(tag, frequencies[pitch], amplitude, timeStamp);
 		} else {
-//			instrument.off(JMSL.now(), 1.0, data);
+			allocator.noteOff(tag, timeStamp);
 		}
 		enableControls();
+	}
+
+	private void initializeMusic() {
+		synth = JSyn.createSynthesizer();
+
+		// Add an output.
+		LineOut lineOut;
+		synth.add(lineOut = new LineOut());
+
+		UnitVoice[] voices = new UnitVoice[MAX_VOICES];
+		for (int i = 0; i < MAX_VOICES; i++) {
+			SubtractiveSynthVoice voice = new SubtractiveSynthVoice();
+			synth.add(voice);
+			voice.getOutput().connect(0, lineOut.input, 0);
+			voice.getOutput().connect(0, lineOut.input, 1);
+			voices[i] = voice;
+		}
+		allocator = new VoiceAllocator(voices);
+
+		// Start synthesizer using default stereo output at 44100 Hz.
+		synth.start();
+		// We only need to start the LineOut. It will pull data from the
+		// voices.
+		lineOut.start();
 	}
 
 	private void enableControls() {
