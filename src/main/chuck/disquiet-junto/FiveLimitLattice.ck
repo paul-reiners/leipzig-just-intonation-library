@@ -26,16 +26,14 @@
  * 
  * 	paul.reiners@gmail.com
  */
-import com.leipzig48.leipzig.core.Interval;
-import com.leipzig48.leipzig.exceptions.CoordinatesOutOfBoundsException;
-import com.leipzig48.leipzig.exceptions.InvalidIntervalException;
+Machine.add(me.dir() + "/Interval.ck");
 
 /**
  * @author Paul Reiners
  */
 public class FiveLimitLattice {
 
-	private Interval[][] nodes;
+	Interval[5][5] nodes;
 
 	private int xRadius;
 
